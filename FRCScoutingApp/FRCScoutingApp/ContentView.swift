@@ -1,24 +1,42 @@
-//
-//  ContentView.swift
-//  FRCScoutingApp
-//
-//  Created by Avi Sharma on 11/5/24.
-//
-
 import SwiftUI
 
 struct ContentView: View {
+    @State private var piecesScored: String = ""
+    @State private var feedback: String = ""
+    
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+        VStack(spacing: 20) {
+            Text("FRC Scouting App")
+                .font(.largeTitle)
+                .fontWeight(.bold)
+
+            TextField("Enter pieces scored", text: $piecesScored)
+                .padding()
+                .border(Color.gray, width: 1)
+                .keyboardType(.numberPad)
+
+            Button(action: {
+                feedback = "You scored \(piecesScored) pieces."
+                piecesScored = "" // Clear the text field after submission
+            }) {
+                Text("Submit")
+                    .font(.headline)
+                    .padding()
+                    .background(Color.blue)
+                    .foregroundColor(.white)
+                    .cornerRadius(8)
+            }
+
+            Text(feedback)
+                .font(.subheadline)
+                .foregroundColor(.green)
         }
         .padding()
     }
 }
 
-#Preview {
-    ContentView()
+struct ContentView_Previews: PreviewProvider {
+    static var previews: some View {
+        ContentView()
+    }
 }
