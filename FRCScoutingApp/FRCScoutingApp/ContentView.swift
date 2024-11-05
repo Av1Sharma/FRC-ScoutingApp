@@ -3,23 +3,19 @@ import SwiftUI
 struct ContentView: View {
     @State private var piecesScored: String = ""
     @State private var feedback: String = ""
-    
+    @State private var matches: [Match] = []
+    @State private var eventKey: String = "2024vaale" // Specify your event key here
+
     var body: some View {
         VStack(spacing: 20) {
             Text("FRC Scouting App")
                 .font(.largeTitle)
                 .fontWeight(.bold)
 
-            TextField("Enter pieces scored", text: $piecesScored)
-                .padding()
-                .border(Color.gray, width: 1)
-                .keyboardType(.numberPad)
-
             Button(action: {
-                feedback = "You scored \(piecesScored) pieces."
-                piecesScored = "" // Clear the text field after submission
+                fetchMatches(for: eventKey) // Call fetchMatches with the specified event key
             }) {
-                Text("Submit")
+                Text("Load Matches")
                     .font(.headline)
                     .padding()
                     .background(Color.blue)
@@ -27,11 +23,39 @@ struct ContentView: View {
                     .cornerRadius(8)
             }
 
-            Text(feedback)
-                .font(.subheadline)
-                .foregroundColor(.green)
+            // List of matches
+            if matches.isEmpty {
+                Text("No matches found.")
+                    .font(.subheadline)
+                    .foregroundColor(.gray)
+            } else {
+                List(matches, id: \.matchNumber) { match in
+                    HStack {
+                        Text("Match \(match.matchNumber): ")
+                            .fontWeight(.bold)
+                        if let teamKeys = match.teamKeys, !teamKeys.isEmpty {
+                            Text(teamKeys.joined(separator: ", "))
+                        } else {
+                            Text("No teams available")
+                                .foregroundColor(.red)
+                        }
+                    }
+                }
+            }
         }
         .padding()
+    }
+
+    // Updated fetchMatches function to use event key
+    func fetchMatches(for eventKey: String) {
+        let apiService = APIService()
+        print("Fetching matches for event key: \(eventKey)") // Debug print
+        apiService.fetchMatches(for: eventKey) { matches in
+            DispatchQueue.main.async {
+                print("Matches fetched: \(matches)") // Debug print
+                self.matches = matches
+            }
+        }
     }
 }
 
