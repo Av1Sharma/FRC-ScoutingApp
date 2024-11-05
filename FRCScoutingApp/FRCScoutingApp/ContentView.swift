@@ -25,35 +25,36 @@ struct ContentView: View {
 
             // List of matches
             if matches.isEmpty {
-                Text("No matches found.")
+                Text("No qualification matches found.")
                     .font(.subheadline)
                     .foregroundColor(.gray)
             } else {
-                List(matches, id: \.matchNumber) { match in
+                List(matches) { match in
                     HStack {
-                        Text("Match \(match.matchNumber): ")
+                        Text("Match \(match.matchNumber):")
                             .fontWeight(.bold)
-                        if let teamKeys = match.teamKeys, !teamKeys.isEmpty {
-                            Text(teamKeys.joined(separator: ", "))
-                        } else {
-                            Text("No teams available")
-                                .foregroundColor(.red)
-                        }
+                        Text("Blue: \(match.blueTeams.joined(separator: ", "))")
+                        Text("Red: \(match.redTeams.joined(separator: ", "))")
                     }
                 }
             }
         }
-        .padding()
+        .padding() // Moved padding to the correct position
     }
 
     // Updated fetchMatches function to use event key
     func fetchMatches(for eventKey: String) {
         let apiService = APIService()
         print("Fetching matches for event key: \(eventKey)") // Debug print
-        apiService.fetchMatches(for: eventKey) { matches in
+        apiService.fetchMatches(for: eventKey) { rawMatches in
             DispatchQueue.main.async {
-                print("Matches fetched: \(matches)") // Debug print
-                self.matches = matches
+                print("Raw matches fetched: \(rawMatches)") // Debug print
+                
+                // Filter matches to include only qualification matches (comp_level == "qm")
+                self.matches = rawMatches.filter { $0.compLevel == "qm" }
+                
+                // Debug print to check filtered matches
+                print("Filtered matches (QM): \(self.matches)")
             }
         }
     }
