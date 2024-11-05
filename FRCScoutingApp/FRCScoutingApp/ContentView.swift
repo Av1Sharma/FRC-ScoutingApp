@@ -39,7 +39,7 @@ struct ContentView: View {
                 }
             }
         }
-        .padding() // Moved padding to the correct position
+        .padding()
     }
 
     // Updated fetchMatches function to use event key
@@ -53,8 +53,11 @@ struct ContentView: View {
                 // Filter matches to include only qualification matches (comp_level == "qm")
                 self.matches = rawMatches.filter { $0.compLevel == "qm" }
                 
-                // Debug print to check filtered matches
-                print("Filtered matches (QM): \(self.matches)")
+                // Sort matches by match number
+                self.matches.sort { $0.matchNumber < $1.matchNumber }
+                
+                // Debug print to check filtered and sorted matches
+                print("Filtered and sorted matches (QM): \(self.matches)")
             }
         }
     }
