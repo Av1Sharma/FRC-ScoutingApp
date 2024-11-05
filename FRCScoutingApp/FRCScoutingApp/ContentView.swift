@@ -30,11 +30,22 @@ struct ContentView: View {
                     .foregroundColor(.gray)
             } else {
                 List(matches) { match in
-                    HStack {
+                    VStack(alignment: .leading) {
                         Text("Match \(match.matchNumber):")
                             .fontWeight(.bold)
-                        Text("Blue: \(match.blueTeams.joined(separator: ", "))")
-                        Text("Red: \(match.redTeams.joined(separator: ", "))")
+
+                        HStack {
+                            ForEach(match.blueTeams, id: \.self) { team in
+                                Text(team)
+                                    .foregroundColor(.blue) // Set font color to blue for blue alliance
+                            }
+                        }
+                        HStack {
+                            ForEach(match.redTeams, id: \.self) { team in
+                                Text(team)
+                                    .foregroundColor(.red) // Set font color to red for red alliance
+                            }
+                        }
                     }
                 }
             }
