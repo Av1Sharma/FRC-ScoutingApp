@@ -6,7 +6,7 @@ struct ScoutingFormView: View {
     @State private var piecesScored: String = ""
     @State private var feedback: String = ""
 
-    // New states
+    // Auton and Teleop states
     @State private var playedAuton: Bool = false
     @State private var ampScore: Int = 0
     @State private var speakerScore: Int = 0
@@ -26,6 +26,12 @@ struct ScoutingFormView: View {
     @State private var melodyBonus: Bool = false
     @State private var ensembleBonus: Bool = false
     @State private var endPosition: String = "Onstage" // Default to "Onstage"
+    
+    // Strengths and Weaknesses states
+    @State private var selectedStrengths: Set<String> = [] // To hold selected strengths
+    @State private var otherStrength: String = "" // To store "Other" input
+    @State private var selectedWeaknesses: Set<String> = [] // To hold selected weaknesses
+    @State private var otherWeakness: String = "" // To store "Other" weakness
 
     var body: some View {
         VStack(spacing: 20) {
@@ -259,49 +265,105 @@ struct ScoutingFormView: View {
                                 }
                             }
                         }
-
-                        // If didn't move, no dropdown
-                        if playedTeleop == "Didn't Move" {
-                            Text("No additional data needed for Didn't Move.")
-                                .font(.subheadline)
-                        }
                     }
 
-                    TextField("Feedback", text: $feedback)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .padding()
-
-                    // Endgame section
+                    // Endgame data
                     VStack(spacing: 20) {
                         Text("Endgame Data")
                             .font(.headline)
-
-                        Toggle("Melody Bonus Achieved?", isOn: $melodyBonus)
+                        
+                        Toggle("Melody Bonus?", isOn: $melodyBonus)
                             .padding()
-
-                        Toggle("Ensemble Bonus Achieved?", isOn: $ensembleBonus)
+                        
+                        Toggle("Ensemble Bonus?", isOn: $ensembleBonus)
                             .padding()
-
+                        
                         Picker("End Position", selection: $endPosition) {
                             Text("Onstage").tag("Onstage")
+                            Text("None").tag("None")
                             Text("Onstage Spotlit").tag("Onstage Spotlit")
                             Text("Stage Park").tag("Stage Park")
                         }
-                        .pickerStyle(SegmentedPickerStyle())
+                        .pickerStyle(MenuPickerStyle())
                         .padding()
                     }
 
+                    // Strengths
+                    VStack(spacing: 20) {
+                        Text("Strengths")
+                            .font(.headline)
+                        
+                        ForEach(["Fast Robot", "Good Auton", "Good Defense", "Good Driving", "Good Intake", "Good Passing", "High Accuracy", "Good Amp"], id: \.self) { strength in
+                            Toggle(strength, isOn: Binding(
+                                get: { selectedStrengths.contains(strength) },
+                                set: { isSelected in
+                                    if isSelected {
+                                        selectedStrengths.insert(strength)
+                                    } else {
+                                        selectedStrengths.remove(strength)
+                                    }
+                                }
+                            ))
+                            .padding()
+                        }
+                        
+                        if selectedStrengths.contains("Other") {
+                            TextField("Describe Other Strength", text: $otherStrength)
+                                .textFieldStyle(RoundedBorderTextFieldStyle())
+                                .padding()
+                        }
+                    }
+
+                    // Weaknesses
+                    VStack(spacing: 20) {
+                        Text("Weaknesses")
+                            .font(.headline)
+
+                        ForEach(["Slow Robot", "Poor Auton", "Weak Defense", "Poor Driving", "Poor Intake", "Poor Passing", "Low Accuracy", "Poor Amp"], id: \.self) { weakness in
+                            Toggle(weakness, isOn: Binding(
+                                get: { selectedWeaknesses.contains(weakness) },
+                                set: { isSelected in
+                                    if isSelected {
+                                        selectedWeaknesses.insert(weakness)
+                                    } else {
+                                        selectedWeaknesses.remove(weakness)
+                                    }
+                                }
+                            ))
+                            .padding()
+                        }
+
+                        if selectedWeaknesses.contains("Other") {
+                            TextField("Describe Other Weakness", text: $otherWeakness)
+                                .textFieldStyle(RoundedBorderTextFieldStyle())
+                                .padding()
+                        }
+                    }
+
+                    // Feedback section
+                    VStack(spacing: 20) {
+                        Text("Feedback")
+                            .font(.headline)
+
+                        TextField("Enter Feedback", text: $feedback)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .padding()
+                    }
+
+                    // Save button
                     Button(action: {
                         saveScoutingData()
+                        presentationMode.wrappedValue.dismiss() // Close the page
                     }) {
                         Text("Save Scouting Data")
-                            .font(.headline)
+                            .font(.title)
                             .padding()
                             .background(Color.blue)
                             .foregroundColor(.white)
                             .cornerRadius(8)
                     }
                 }
+                .padding()
             }
         }
     }
@@ -312,6 +374,8 @@ struct ScoutingFormView: View {
         print("Teleop: Played \(playedTeleop), Speaker Notes: \(speakerNotes), Auton Notes: \(autonNotes), Cooperated: \(cooperated), Trap Note: \(trapNote), Rating: \(teleopRating) stars")
         print("Defense Observations: \(defenseObservations), Defense Rating: \(teleopRating) stars")
         print("Endgame: Melody Bonus: \(melodyBonus), Ensemble Bonus: \(ensembleBonus), End Position: \(endPosition)")
+        print("Strengths: \(selectedStrengths), Other Strength: \(otherStrength)")
+        print("Weaknesses: \(selectedWeaknesses), Other Weakness: \(otherWeakness)")
+        print("Feedback: \(feedback)")
     }
 }
-
